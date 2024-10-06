@@ -1,0 +1,115 @@
+import '@/entrypoints/popup/content.css';
+import aiLogo from '@/assets/icon.svg';
+
+export default defineContentScript({
+  matches: ["*://www.linkedin.com/*"],
+  main() {
+    
+    const createIcon = (parentContainer: HTMLElement) => {
+      // Created icon element
+      const iconElement = document.createElement('img');
+        iconElement.src = aiLogo;
+        iconElement.alt = "Icon";
+        
+        iconElement.classList.add(
+          'absolute',  
+          'w-8',       
+          'h-8',       
+          'bottom-2',
+          'right-2', 
+          'cursor-pointer', 
+          'z-50'       
+        );
+
+        // Add click event to show the modal when the icon is clicked
+        iconElement.addEventListener('click', () => {
+        createModal();
+      });
+
+      // Appended icon to the parent container
+      parentContainer.appendChild(iconElement);
+    };
+
+    // Remove the icon from the DOM
+    const removeIcon = (parentContainer: HTMLElement) => {
+      const iconElement = parentContainer.querySelector('img[alt="Icon"]');
+      if (iconElement) {
+        iconElement.remove(); 
+      }
+    };
+
+    const createModal = () => {
+      // Create modal container
+      const modalOverlay = document.createElement('div');
+      modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'bg-white p-4 rounded shadow-md';
+      modalContent.innerHTML = `
+        <h2 class="text-lg font-semibold mb-2">Your Input</h2>
+        <input type="text" placeholder="Type your message..." class="border rounded p-2 w-full" />
+        <button id="close-modal" class="mt-2 bg-blue-500 text-white rounded px-4 py-2">Close</button>
+      `;
+      
+      modalOverlay.appendChild(modalContent);
+      document.body.appendChild(modalOverlay);
+
+      // Add event listener to close the modal
+      const closeButton = modalContent.querySelector('#close-modal');
+      if (closeButton) {
+        closeButton.addEventListener('click', () => {
+          document.body.removeChild(modalOverlay); // Remove modal from DOM
+        });
+      }
+
+      // Close the modal when clicking outside of it
+      modalOverlay.addEventListener('click', (event) => {
+        if (event.target === modalOverlay) {
+          document.body.removeChild(modalOverlay); // Remove modal from DOM
+        }
+      });
+    };
+
+
+    const checkForMessageInput = () => { 
+      const messageInput = document.querySelector('div[contenteditable="true"]');
+
+      // Function to handle when the message input field is found
+      if (messageInput) {
+
+        // Added click event listener to the message input
+        messageInput.addEventListener('focus', () => {
+          const parentContainer = messageInput.closest('div.msg-form__msg-content-container--scrollable') as HTMLElement;
+          if (parentContainer && !parentContainer.querySelector('img[alt="Icon"]')) {
+            // create the icon if it does not already exist
+            parentContainer.classList.add('relative'); 
+            createIcon(parentContainer);
+          }
+        });
+
+        // Added blur event listener to remove the icon when focus is lost
+        messageInput.addEventListener('blur', () => {
+          const parentContainer = messageInput.closest('div.msg-form__msg-content-container--scrollable') as HTMLElement;
+          if (parentContainer) {
+            removeIcon(parentContainer);
+          }
+        });
+
+        return true;
+      } 
+      return false;
+    };
+    
+    // Poll every second until the message input field is found
+    
+    const intervalId = setInterval(() => {
+      if (checkForMessageInput()) {
+        clearInterval(intervalId); // Stop polling once the element is found
+      }
+    }, 1000);
+    
+  }
+});
+
+
+
