@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependency directories
 node_modules
 .pnp
 .pnp.js
@@ -41,5 +42,8 @@ coverage/
 #Sandbox
 .webpack/
 .wxt/
+
+# Typescript cache
+*.tsbuildinfo
 
 
