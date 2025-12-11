@@ -8,11 +8,20 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.pnp
+.pnp.js
 .output
 stats.html
 stats-*.json
 .wxt
 web-ext.config.ts
+
+# Build output
+dist/
+build/
+.output/
+.next/
+coverage/
 
 # Editor directories and files
 .vscode/*
@@ -24,3 +33,13 @@ web-ext.config.ts
 *.njsproj
 *.sln
 *.sw?
+.vs/
+
+# Media
+*.mp4
+
+#Sandbox
+.webpack/
+.wxt/
+
+
